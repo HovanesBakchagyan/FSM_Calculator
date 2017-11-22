@@ -1,0 +1,67 @@
+`timescale 1ns / 1ps
+module DP_tb;
+
+reg [2:0] in1_tb, in2_tb;
+reg [1:0] s1_tb, wa_tb, raa_tb, rab_tb, c_tb;
+reg we_tb, rea_tb, reb_tb, s2_tb, clk_tb;
+wire [2:0] out_tb;
+integer i,j,k;
+DP DUT(.in1(in1_tb), .in2(in2_tb), .s1(s1_tb), .clk(clk_tb), .wa(wa_tb), .we(we_tb), .raa(raa_tb), .rea(rea_tb), .rab(rab_tb), .reb(reb_tb), .c(c_tb), .s2(s2_tb), .out(out_tb));
+
+initial clk_tb =0;
+always
+#10 clk_tb = ~clk_tb;
+
+initial 
+    begin
+        for(i = 0; i<8; i=i+1)begin
+            for(j = 0; j<8; j=j+1)begin
+                for(k=0; k<4; k=k+1) begin
+                #20
+                    raa_tb = 0;
+                    rab_tb = 1;
+                    #20
+                    s1_tb = 3;
+                    we_tb = 1;
+                    rea_tb = 0;
+                    reb_tb = 0;
+                    wa_tb = 0;
+                    in1_tb = i;
+                    #20
+                    s1_tb = 2;
+                    wa_tb = 1;
+                    in2_tb = j;
+                    #20
+                    we_tb = 0;
+                    rea_tb = 1;
+                    reb_tb = 1;
+                    c_tb = k; 
+                    #20
+                    s2_tb = 1;
+                    s1_tb = 0;
+                    wa_tb = 2;
+                    rea_tb = 1;
+                    reb_tb = 1;
+                    we_tb = 1;
+                  
+                    #20
+                    s1_tb = 1;
+                    if(rea_tb != 0 & reb_tb != 0)begin
+                    if(c_tb == 0 & out_tb != (in1_tb + in2_tb) )
+                        $display("error with addition: %d + %d != %d",in1_tb,in2_tb,out_tb);
+                    if(c_tb == 1 & out_tb != (in1_tb - in2_tb) )
+                       $display("error with subtraction: %d - %d != %d",in1_tb,in2_tb,out_tb);
+                    if(c_tb == 2 & out_tb != (in1_tb & in2_tb) )
+                       $display("error with AND: %d AND %d != %d",in1_tb,in2_tb,out_tb);
+                     if(c_tb == 3 & out_tb != (in1_tb ^ in2_tb) )
+                       $display("error with XOR: %d XOR %d != %d",in1_tb,in2_tb,out_tb);    
+                    end
+    end
+    end
+    end
+    
+    
+    $display("finish");
+    $stop;
+    end
+endmodule
